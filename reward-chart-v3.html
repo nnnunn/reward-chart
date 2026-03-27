@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>寶貝集點卡</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Noto+Sans+TC:wght@400;500;700;900&family=Pacifico&display=swap" rel="stylesheet">
+<style>
+/* ===== BASE — cream/beige always ===== */
+:root {
+  --bg: #f5f0e8;
+  --surface: #ffffff;
+  --surface2: #f0ebe0;
+  --border: #e0d8cc;
+  --text: #2e2620;
+  --text2: #8a7d70;
+  --shadow: rgba(80,60,30,0.10);
+  --card-r: 18px;
+  --font-d: 'Nunito','Noto Sans TC',sans-serif;
+  --font-b: 'Noto Sans TC',sans-serif;
+
+  /* card palette — 8 colors cycling on items */
+  --c0: #e8c0b0; --c0t: #6a2e18;  /* peach */
+  --c1: #b8ddb8; --c1t: #1e4a20;  /* mint */
+  --c2: #b8d4f0; --c2t: #1a3a68;  /* sky */
+  --c3: #e0c8f0; --c3t: #3e2060;  /* lavender */
+  --c4: #f0e0a8; --c4t: #5a3e08;  /* yellow */
+  --c5: #f0b8c8; --c5t: #6a1830;  /* pink */
+  --c6: #b8ead8; --c6t: #0e4030;  /* teal */
+  --c7: #f0d0a8; --c7t: #5a3010;  /* sand */
+
+  /* UI accents */
+  --accent:   #b08868;
+  --accent-s: #7ab87a;
+  --topbar:   #ede8e0;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-b);background-color:#f5f0e8;color:var(--text);min-height:100vh;position:relative;}
+
+/* full-page decorative background */
+body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background-color:#f5f0e8;}
+#page-deco{position:fixed;inset:0;z-index:-1;pointer-events:none;width:100%;height:100%;}
+
+/* ===== TOP STRIP ===== */
+.topbar{background:var(--topbar);border-bottom:1.5px solid var(--border);padding:9px 16px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;}
+.topbar-label{font-size:12px;color:var(--text2);font-weight:700;margin-right:4px;}
+
+/* switcher */
+.switcher-bar{background:transparent;border-bottom:1.5px solid var(--border);padding:8px 16px;display:flex;justify-content:center;align-items:center;}
+#child-switcher{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.c-tab{display:inline-flex;align-items:center;gap:6px;padding:6px 16px;border-radius:30px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;font-family:var(--font-b);cursor:pointer;transition:all 0.18s;}
+.c-tab:hover{border-color:var(--accent);}
+.c-tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.c-tab-add{border-style:dashed;color:var(--text2);}
+.c-tab-add:hover{color:var(--accent);border-color:var(--accent);background:var(--surface2);}
+
+/* ===== CHILD CARD ===== */
+.child-section{max-width:660px;margin:0 auto;padding:12px 14px 0;}
+.child-card{display:flex;align-items:center;gap:14px;background:#fff;border-radius:var(--card-r);padding:16px 18px;box-shadow:0 2px 12px var(--shadow);border:1.5px solid var(--border);flex-wrap:wrap;}
+.avatar-wrap{position:relative;flex-shrink:0;cursor:pointer;}
+.avatar{width:56px;height:56px;border-radius:50%;background:#f0e8d8;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;transition:transform 0.18s;font-size:30px;line-height:1;cursor:pointer;}
+.avatar:hover{transform:scale(1.07);}
+.avatar-badge{position:absolute;bottom:-1px;right:-1px;background:var(--accent);color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff;}
+
+/* animal picker */
+.ap-wrap{position:absolute;top:64px;left:0;z-index:200;background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:10px;box-shadow:0 8px 28px var(--shadow);display:none;flex-wrap:wrap;gap:8px;width:196px;}
+.ap-wrap.open{display:flex;}
+.ap-item{width:50px;height:50px;border-radius:12px;border:2px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.14s;font-size:26px;line-height:1;}
+.ap-item:hover,.ap-item.sel{border-color:var(--accent);background:#fef3ee;}
+
+.child-info{flex:1;min-width:110px;}
+.name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.child-name{font-family:var(--font-d);font-size:21px;font-weight:900;color:var(--text);background:none;border:none;border-bottom:2px dashed var(--border);padding:2px 4px;width:148px;cursor:text;transition:border-color 0.18s;}
+.child-name:focus{outline:none;border-bottom-color:var(--accent);}
+.name-hint{font-size:11px;color:var(--text2);font-weight:600;}
+.pts-pill{background:var(--accent);color:#fff;padding:7px 18px;border-radius:30px;font-size:16px;font-weight:800;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;font-family:var(--font-d);}
+
+/* ===== PROGRESS ===== */
+.progress-card{margin-top:10px;background:#fff;border-radius:var(--card-r);padding:14px 18px;box-shadow:0 2px 10px var(--shadow);border:1.5px solid var(--border);}
+.prog-top{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--text2);margin-bottom:7px;}
+.prog-top span{color:var(--accent);}
+.prog-track{height:14px;background:var(--surface2);border-radius:8px;overflow:hidden;}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--accent),#e8904a);border-radius:8px;transition:width 0.6s cubic-bezier(.4,0,.2,1);}
+
+/* ===== STAMP CARD ===== */
+.stamp-card{margin-top:10px;background:#fff;border-radius:var(--card-r);padding:14px 18px;box-shadow:0 2px 10px var(--shadow);border:1.5px solid var(--border);}
+.stamp-label{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;}
+.stamp-grid{display:flex;flex-wrap:wrap;gap:7px;}
+.stamp{width:34px;height:34px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;transition:all 0.18s;}
+.stamp.on{animation:spop 0.28s cubic-bezier(.4,0,.2,1);}
+.stamp svg{width:20px;height:20px;}
+@keyframes spop{0%{transform:scale(0.5);opacity:.4;}65%{transform:scale(1.22);}100%{transform:scale(1);opacity:1;}}
+
+/* ===== TABS ===== */
+.tabs{display:flex;gap:5px;padding:14px 14px 0;max-width:660px;margin:0 auto;}
+.tab{flex:1;padding:10px 6px;border-radius:12px 12px 0 0;border:1.5px solid var(--border);border-bottom:none;background:var(--surface2);color:var(--text2);font-size:13px;font-weight:700;font-family:var(--font-b);cursor:pointer;text-align:center;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:4px;}
+.tab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
+/* ===== MAIN CARD ===== */
+.main-card{max-width:660px;margin:0 auto 28px;background:#fff;border-radius:0 0 var(--card-r) var(--card-r);border:1.5px solid var(--border);box-shadow:0 4px 18px var(--shadow);padding:16px;}
+.panel{display:none;}.panel.active{display:block;}
+.section-hd{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:12px;}
+
+/* ===== ITEM ROWS — soft pastel colors ===== */
+.item-list{display:flex;flex-direction:column;gap:10px;}
+.item-row{display:flex;align-items:center;gap:8px;padding:13px 14px;border-radius:14px;border:none;transition:box-shadow 0.18s;flex-wrap:wrap;}
+.item-row:hover{box-shadow:0 3px 14px var(--shadow);}
+
+.item-row[data-ci="0"]{background:#f2e6e0;} /* dusty rose */
+.item-row[data-ci="1"]{background:#e2ede2;} /* sage */
+.item-row[data-ci="2"]{background:#deeaf5;} /* powder blue */
+.item-row[data-ci="3"]{background:#ece5f0;} /* mist lavender */
+.item-row[data-ci="4"]{background:#f5eedc;} /* warm straw */
+.item-row[data-ci="5"]{background:#f0e5ec;} /* blush */
+.item-row[data-ci="6"]{background:#ddf0ea;} /* seafoam */
+.item-row[data-ci="7"]{background:#f0ebe0;} /* linen */
+
+.item-name-d{flex:1;font-size:13px;font-weight:700;color:#7a6e66;padding:0 4px;min-width:80px;}
+.pts-d{font-size:13px;font-weight:800;color:#a8907a;padding:0 4px;flex-shrink:0;white-space:nowrap;}
+
+/* edit mode */
+.edit-fs{display:none;align-items:center;gap:8px;flex:1;flex-wrap:wrap;}
+.item-row.editing .edit-fs{display:flex;}
+.item-row.editing .item-name-d,.item-row.editing .pts-d,.item-row.editing .cat-tag{display:none;}
+.item-row.editing .cmp-btn,.item-row.editing .rdm-btn{display:none;}
+.name-in{flex:1;font-size:14px;font-weight:700;color:var(--text);background:rgba(255,255,255,0.7);border:2px solid rgba(0,0,0,0.18);border-radius:8px;padding:5px 10px;font-family:var(--font-b);min-width:80px;outline:none;}
+.pts-ctrl{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.pts-b{width:26px;height:26px;border-radius:8px;border:2px solid rgba(0,0,0,0.15);background:rgba(255,255,255,0.6);color:var(--text);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.14s;line-height:1;}
+.pts-b:hover{background:rgba(255,255,255,0.9);}
+.pts-v{font-size:13px;font-weight:800;color:var(--text);min-width:40px;text-align:center;white-space:nowrap;}
+
+/* action buttons */
+.ib{width:28px;height:28px;border-radius:8px;border:2px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.5);color:var(--text2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.14s;flex-shrink:0;}
+.ib:hover.eb{background:rgba(255,255,255,0.85);}
+.ib:hover.db{background:rgba(255,80,80,0.18);border-color:#e05555;color:#e05555;}
+.sv-b{padding:6px 11px;border-radius:8px;border:none;background:rgba(0,0,0,0.18);color:#fff;font-size:12px;font-weight:700;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
+.sv-b:hover{background:rgba(0,0,0,0.28);}
+.cl-b{padding:6px 9px;border-radius:8px;border:2px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.5);color:var(--text2);font-size:12px;font-weight:700;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
+.item-row .sv-b,.item-row .cl-b{display:none;}
+.item-row.editing .eb{display:none;}
+.item-row.editing .sv-b,.item-row.editing .cl-b{display:inline-flex;}
+
+.cmp-btn{padding:6px 13px;border-radius:10px;border:none;background:rgba(255,255,255,0.65);color:var(--text);font-size:12px;font-weight:800;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
+.cmp-btn:hover{background:rgba(255,255,255,0.9);}
+.cmp-btn:active{transform:scale(0.96);}
+.rdm-btn{padding:6px 13px;border-radius:10px;border:none;background:rgba(255,255,255,0.65);color:var(--text);font-size:12px;font-weight:800;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
+.rdm-btn:hover{background:rgba(255,255,255,0.9);}
+.rdm-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+.add-btn{width:100%;margin-top:10px;padding:11px;border-radius:12px;border:2px dashed var(--border);background:none;color:var(--text2);font-size:13px;font-weight:700;font-family:var(--font-b);cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--surface2);}
+
+/* ===== STAMP REWARDS ===== */
+.stamp-reward-divider{display:flex;align-items:center;gap:10px;margin:20px 0 8px;font-size:13px;font-weight:800;color:var(--text2);}
+.stamp-reward-divider::before,.stamp-reward-divider::after{content:'';flex:1;height:1.5px;background:var(--border);}
+.stamp-reward-hint{font-size:11px;color:var(--text2);font-weight:600;margin-bottom:12px;}
+.sr-row{display:flex;align-items:center;gap:8px;padding:12px 14px;border-radius:14px;background:#fff;border:1.5px solid var(--border);margin-bottom:10px;flex-wrap:wrap;transition:box-shadow 0.18s;}
+.sr-row:hover{box-shadow:0 3px 14px var(--shadow);}
+.sr-name-d{flex:1;font-size:15px;font-weight:800;color:var(--text);padding:0 4px;min-width:80px;}
+.sr-req-d{font-size:13px;font-weight:700;color:var(--text2);white-space:nowrap;padding:0 4px;flex-shrink:0;}
+.sr-req-d strong{color:var(--accent);}
+.sr-progress{width:100%;margin-top:6px;}
+.sr-prog-track{height:8px;background:#d8d0c8;border-radius:6px;overflow:hidden;}
+.sr-prog-fill{height:100%;background:linear-gradient(90deg,#b8d4f0,#a0c0e8);border-radius:6px;transition:width 0.5s cubic-bezier(.4,0,.2,1);}
+.sr-prog-label{font-size:11px;color:var(--text2);font-weight:600;margin-top:4px;}
+.rdm-stamp-btn{padding:6px 12px;border-radius:10px;border:none;background:#b8d4f0;color:#1a3a68;font-size:12px;font-weight:800;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
+.rdm-stamp-btn:hover{background:#9fc4e8;}
+.rdm-stamp-btn:disabled{opacity:0.38;cursor:not-allowed;}
+/* sr edit mode */
+.sr-edit-fs{display:none;align-items:center;gap:8px;flex:1;flex-wrap:wrap;}
+.sr-row.editing .sr-edit-fs{display:flex;}
+.sr-row.editing .sr-name-d,.sr-row.editing .sr-req-d,.sr-row.editing .sr-progress,.sr-row.editing .rdm-stamp-btn{display:none;}
+.sr-req-ctrl{display:flex;align-items:center;gap:5px;flex-shrink:0;}
+
+/* ===== CATEGORY TAGS ===== */
+.cat-tag{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:400;white-space:nowrap;flex-shrink:0;margin-right:2px;color:#fff;}
+.cat-運動{background:#8fbfa8;}  /* muted teal-green */
+.cat-家事{background:#c9968a;}  /* muted terracotta */
+.cat-生活{background:#8aaac8;}  /* muted steel blue */
+.cat-習慣{background:#a898c8;}  /* muted lavender */
+.cat-學校{background:#c8b870;}  /* muted gold */
+.cat-sel{font-size:12px;font-weight:700;border:1.5px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.6);border-radius:8px;padding:4px 6px;color:var(--text);font-family:var(--font-b);cursor:pointer;outline:none;flex-shrink:0;}
+
+/* ===== STAMP REWARD ROWS — pastel ===== */
+.sr-row[data-ci="0"]{background:#f2e6e0;}
+.sr-row[data-ci="1"]{background:#e2ede2;}
+.sr-row[data-ci="2"]{background:#deeaf5;}
+.sr-row[data-ci="3"]{background:#ece5f0;}
+.sr-row[data-ci="4"]{background:#f5eedc;}
+.sr-row[data-ci="5"]{background:#f0e5ec;}
+.sr-row[data-ci="6"]{background:#ddf0ea;}
+.sr-row[data-ci="7"]{background:#f0ebe0;}
+.sr-row{border:none !important;}
+
+/* ===== GOAL EDIT ===== */
+.goal-row{display:flex;align-items:center;gap:6px;}
+.goal-edit-btn{width:22px;height:22px;border-radius:6px;border:1.5px solid var(--border);background:none;color:var(--text2);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.14s;padding:0;}
+.goal-edit-btn:hover{background:var(--surface2);border-color:var(--accent);color:var(--accent);}
+.goal-edit-area{background:var(--surface2);border-radius:10px;padding:10px 12px;margin-bottom:10px;border:1.5px solid var(--border);}
+
+/* ===== CHILD MANAGER MODAL ===== */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:300;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal-box{background:#fff;border-radius:20px;padding:20px;width:100%;max-width:360px;box-shadow:0 12px 40px rgba(0,0,0,0.2);}
+.modal-title{font-family:var(--font-d);font-size:17px;font-weight:900;color:var(--text);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--border);background:none;color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:#ffeeee;color:#e05555;border-color:#e05555;}
+.child-mgr-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:var(--surface2);border:1.5px solid var(--border);margin-bottom:8px;}
+.child-mgr-emoji{font-size:24px;flex-shrink:0;}
+.child-mgr-name{flex:1;font-size:15px;font-weight:700;color:var(--text);background:none;border:none;border-bottom:1.5px dashed var(--border);padding:2px 4px;font-family:var(--font-b);min-width:60px;outline:none;transition:border-color 0.15s;}
+.child-mgr-name:focus{border-bottom-color:var(--accent);}
+.mgr-add-btn{width:100%;padding:11px;border-radius:12px;border:2px dashed var(--border);background:none;color:var(--text2);font-size:13px;font-weight:700;font-family:var(--font-b);cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px;}
+.mgr-add-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--surface2);}
+.edit-top-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-size:12px;font-weight:700;font-family:var(--font-b);cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:5px;}
+.edit-top-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ===== HISTORY ===== */
+.hist-list{display:flex;flex-direction:column;gap:8px;}
+.hist-row{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:12px;border:none;font-size:13px;font-weight:600;}
+.hist-row.h-task{background:#e4f0e8;}   /* soft green — 完成任務 */
+.hist-row.h-reward{background:#e8e4f2;} /* soft lavender — 兌換獎勵 */
+.hist-row.h-stamp{background:#fdf0dc;}  /* soft amber — 集章獎勵 */
+.hist-time{color:var(--text2);font-size:11px;}
+.hist-pts{font-weight:800;white-space:nowrap;}
+.hist-pts.pos{color:#5a9a68;}
+.hist-pts.neg{color:#a06090;}
+.empty-hint{text-align:center;color:var(--text2);font-size:13px;padding:28px;font-weight:600;}
+
+/* ===== TOAST ===== */
+.tc{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);z-index:999;display:flex;flex-direction:column;gap:8px;pointer-events:none;align-items:center;}
+.toast{background:#2e2620;color:#fff;padding:10px 20px;border-radius:28px;font-size:13px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,0.2);animation:ti .28s ease,to .28s ease 2.2s forwards;white-space:nowrap;}
+@keyframes ti{from{opacity:0;transform:translateY(14px) scale(.92);}to{opacity:1;transform:translateY(0) scale(1);}}
+@keyframes to{from{opacity:1;}to{opacity:0;transform:translateY(8px);}}
+
+/* confetti */
+.cfp{position:fixed;border-radius:2px;top:-10px;pointer-events:none;z-index:1000;animation:cf linear forwards;}
+@keyframes cf{0%{transform:translateY(0) rotate(0deg);opacity:1;}100%{transform:translateY(100vh) rotate(720deg);opacity:0;}}
+</style>
+</head>
+<body>
+
+<!-- full-page decorative background -->
+<svg id="page-deco" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <!-- soft blobs -->
+  <ellipse cx="8" cy="8" rx="18" ry="12" fill="#f0e8d8" opacity=".7"/>
+  <ellipse cx="92" cy="5" rx="16" ry="10" fill="#e8f0d8" opacity=".6"/>
+  <ellipse cx="50" cy="96" rx="28" ry="10" fill="#e8d8f0" opacity=".4"/>
+  <ellipse cx="5" cy="55" rx="14" ry="9" fill="#f0e8d0" opacity=".35"/>
+  <ellipse cx="95" cy="65" rx="12" ry="8" fill="#e0f0e8" opacity=".35"/>
+  <ellipse cx="50" cy="45" rx="20" ry="12" fill="#f0e0f0" opacity=".18"/>
+  <!-- stars -->
+  <polygon points="20,16 20.8,18.4 23.2,18.4 21.4,20 22,22.4 20,21 18,22.4 18.6,20 16.8,18.4 19.2,18.4" fill="#f0c080" opacity=".55"/>
+  <polygon points="80,8 80.6,10 82.6,10 81,11.2 81.6,13.2 80,12 78.4,13.2 79,11.2 77.4,10 79.4,10" fill="#f0a0c0" opacity=".5"/>
+  <polygon points="47,3 47.5,4.8 49.3,4.8 47.9,5.9 48.4,7.7 47,6.6 45.6,7.7 46.1,5.9 44.7,4.8 46.5,4.8" fill="#a0c8f0" opacity=".48"/>
+  <polygon points="13,40 13.5,41.8 15.3,41.8 13.9,42.9 14.4,44.7 13,43.6 11.6,44.7 12.1,42.9 10.7,41.8 12.5,41.8" fill="#b8ead8" opacity=".45"/>
+  <polygon points="88,42 88.5,43.8 90.3,43.8 88.9,44.9 89.4,46.7 88,45.6 86.6,46.7 87.1,44.9 85.7,43.8 87.5,43.8" fill="#f0b8c8" opacity=".45"/>
+  <polygon points="30,72 30.5,73.8 32.3,73.8 30.9,74.9 31.4,76.7 30,75.6 28.6,76.7 29.1,74.9 27.7,73.8 29.5,73.8" fill="#f0c080" opacity=".42"/>
+  <polygon points="70,68 70.5,69.8 72.3,69.8 70.9,70.9 71.4,72.7 70,71.6 68.6,72.7 69.1,70.9 67.7,69.8 69.5,69.8" fill="#c0b0f0" opacity=".42"/>
+  <polygon points="55,82 55.5,83.8 57.3,83.8 55.9,84.9 56.4,86.7 55,85.6 53.6,86.7 54.1,84.9 52.7,83.8 54.5,83.8" fill="#a0d0c8" opacity=".4"/>
+  <polygon points="6,22 6.4,23.4 7.8,23.4 6.7,24.3 7.1,25.7 6,24.8 4.9,25.7 5.3,24.3 4.2,23.4 5.6,23.4" fill="#f0d0a0" opacity=".42"/>
+  <polygon points="94,30 94.4,31.4 95.8,31.4 94.7,32.3 95.1,33.7 94,32.8 92.9,33.7 93.3,32.3 92.2,31.4 93.6,31.4" fill="#d0e8b8" opacity=".42"/>
+  <!-- hearts -->
+  <path d="M38,20 C38,18.8 39.2,18 40.5,18.8 C41.8,18 43,18.8 43,20 C43,21.5 40.5,24 40.5,24 C40.5,24 38,21.5 38,20Z" fill="#f0a0b8" opacity=".42"/>
+  <path d="M59,14 C59,13.2 59.9,12.6 61,13.2 C62.1,12.6 63,13.2 63,14 C63,15.1 61,17 61,17 C61,17 59,15.1 59,14Z" fill="#a0c0f0" opacity=".38"/>
+  <path d="M32,44 C32,43.2 32.9,42.6 34,43.2 C35.1,42.6 36,43.2 36,44 C36,45.1 34,47 34,47 C34,47 32,45.1 32,44Z" fill="#c0e0b8" opacity=".38"/>
+  <path d="M67,38 C67,37.2 67.9,36.6 69,37.2 C70.1,36.6 71,37.2 71,38 C71,39.1 69,41 69,41 C69,41 67,39.1 67,38Z" fill="#f0e0a8" opacity=".38"/>
+  <path d="M20,62 C20,61.2 20.9,60.6 22,61.2 C23.1,60.6 24,61.2 24,62 C24,63.1 22,65 22,65 C22,65 20,63.1 20,62Z" fill="#f0b8d0" opacity=".36"/>
+  <path d="M78,58 C78,57.2 78.9,56.6 80,57.2 C81.1,56.6 82,57.2 82,58 C82,59.1 80,61 80,61 C80,61 78,59.1 78,58Z" fill="#b0c8f0" opacity=".36"/>
+  <path d="M45,75 C45,74.2 45.9,73.6 47,74.2 C48.1,73.6 49,74.2 49,75 C49,76.1 47,78 47,78 C47,78 45,76.1 45,75Z" fill="#f0c0a0" opacity=".36"/>
+  <path d="M12,78 C12,77.2 12.9,76.6 14,77.2 C15.1,76.6 16,77.2 16,78 C16,79.1 14,81 14,81 C14,81 12,79.1 12,78Z" fill="#c0f0d8" opacity=".34"/>
+  <path d="M85,82 C85,81.2 85.9,80.6 87,81.2 C88.1,80.6 89,81.2 89,82 C89,83.1 87,85 87,85 C87,85 85,83.1 85,82Z" fill="#f0d0b8" opacity=".34"/>
+</svg>
+
+<!-- switcher -->
+<div class="switcher-bar">
+  <div id="child-switcher"></div>
+  <button class="edit-top-btn" onclick="openMgr()" style="margin-left:8px;">✏️ 編輯</button>
+</div>
+
+<!-- child manager modal -->
+<div class="modal-overlay" id="mgr-overlay" style="display:none" onclick="e=>e.target===this&&closeMgr()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      👶 管理寶貝
+      <button class="modal-close" onclick="closeMgr()">✕</button>
+    </div>
+    <div id="mgr-list"></div>
+    <button class="mgr-add-btn" onclick="mgrAddChild()">＋ 新增寶貝</button>
+  </div>
+</div>
+
+<!-- child card -->
+<div class="child-section">
+  <div class="child-card">
+    <div class="avatar-wrap" id="awrap">
+      <div class="avatar" id="av" onclick="togglePicker()"></div>
+      <div class="avatar-badge">✎</div>
+      <div class="ap-wrap" id="apicker"></div>
+    </div>
+    <div class="child-info">
+      <div class="name-row">
+        <input class="child-name" id="cname" type="text" value="大寶" maxlength="10" oninput="onName()"/>
+        <span class="name-hint">點名字可修改 ✏️</span>
+      </div>
+    </div>
+    <div class="pts-pill">已獲得 <span id="tpts">0</span> 點</div>
+  </div>
+
+  <div class="progress-card">
+    <div class="prog-top">
+      <span>目標進度</span>
+      <div class="goal-row">
+        <span id="prog-lbl">—</span>
+        <button class="goal-edit-btn" onclick="toggleGoalEdit()" id="goal-edit-btn" title="設定目標">✏️</button>
+      </div>
+    </div>
+    <div class="goal-edit-area" id="goal-edit-area" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        <span style="font-size:13px;font-weight:700;color:var(--text2);">自訂目標點數：</span>
+        <div class="pts-ctrl" style="flex-shrink:0;">
+          <button class="pts-b" onclick="changeGoal(-5)">−</button>
+          <span id="goal-val" style="font-size:14px;font-weight:800;color:var(--accent);min-width:52px;text-align:center;" ></span>
+          <button class="pts-b" onclick="changeGoal(5)">＋</button>
+        </div>
+        <button class="sv-b" onclick="saveGoal()">✔ 儲存</button>
+        <button class="cl-b" onclick="toggleGoalEdit()">✕</button>
+      </div>
+      <div style="font-size:11px;color:var(--text2);font-weight:600;">設為 0 則改為顯示下一個獎勵的距離</div>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="prog-bar" style="width:0%"></div></div>
+  </div>
+
+  <div class="stamp-card">
+    <div class="stamp-label">🏅 集章卡（每完成一項任務蓋一章）</div>
+    <div class="stamp-grid" id="sgrid"></div>
+  </div>
+</div>
+
+<!-- tabs -->
+<div class="tabs" style="margin-top:14px;">
+  <button class="tab active" id="tab-tasks" onclick="switchTab('tasks')">📋 任務</button>
+  <button class="tab" id="tab-rewards" onclick="switchTab('rewards')">🎁 獎勵</button>
+  <button class="tab" id="tab-history" onclick="switchTab('history')">📜 記錄</button>
+</div>
+<div class="main-card">
+  <div class="panel active" id="panel-tasks">
+    <div class="section-hd">📋 完成任務可獲得點數</div>
+    <div class="item-list" id="tlist"></div>
+    <button class="add-btn" onclick="addTask()">＋ 新增任務</button>
+  </div>
+  <div class="panel" id="panel-rewards">
+    <div class="section-hd">🎁 點數可兌換的獎勵</div>
+    <div class="item-list" id="rlist"></div>
+    <button class="add-btn" onclick="addReward()">＋ 新增獎勵</button>
+
+    <div class="stamp-reward-divider">
+      <span>🏅 集章兌換獎勵</span>
+    </div>
+    <div class="stamp-reward-hint">集滿印章即可兌換，可自訂每項所需章數</div>
+    <div id="srlist"></div>
+    <button class="add-btn" onclick="addStampReward()">＋ 新增集章獎勵</button>
+  </div>
+  <div class="panel" id="panel-history">
+    <div class="section-hd">📜 點數紀錄</div>
+    <div id="hcon"></div>
+  </div>
+</div>
+
+<div class="tc" id="tc"></div>
+
+<script>
+/* ===== ANIMALS ===== */
+const ANIMALS = [
+  {id:'rabbit', emoji:'🐰'},
+  {id:'bear',   emoji:'🐻'},
+  {id:'sheep',  emoji:'🐑'},
+  {id:'dog',    emoji:'🐶'},
+  {id:'dino',    emoji:'🦕'},
+  {id:'pig',    emoji:'🐷'},
+];
+
+// ===== STATE =====
+const STAMP_TOTAL = 20;
+const eb = {}; // edit backup
+let nid = 100;
+
+const CARD_COLORS = ['#e8c0b0','#b8ddb8','#b8d4f0','#e0c8f0','#f0e0a8','#f0b8c8','#b8ead8','#f0d0a8'];
+
+function mkChild(name, animal) {
+  return {
+    name, animal: animal||'rabbit',
+    pts: 0, stamps: 0, goal: 0,
+    tasks: [
+      {id:nid++,name:'自己整理房間',pts:5,cat:'家事'},
+      {id:nid++,name:'完成所有回家作業',pts:10,cat:'學校'},
+      {id:nid++,name:'刷牙不需要提醒',pts:3,cat:'生活'},
+      {id:nid++,name:'幫忙洗碗',pts:5,cat:'家事'},
+      {id:nid++,name:'閱讀 15 分鐘',pts:8,cat:'習慣'},
+    ],
+    rewards: [
+      {id:nid++,name:'看 30 分鐘電視',pts:20},
+      {id:nid++,name:'買一包小零食',pts:30},
+      {id:nid++,name:'去公園玩一小時',pts:40},
+      {id:nid++,name:'選一本新書',pts:60},
+      {id:nid++,name:'週末出遊半天',pts:120},
+    ],
+    stampRewards: [
+      {id:nid++,name:'買一個玩具',required:20},
+    ],
+    history: [],
+  };
+}
+
+let kids = [mkChild('大寶','rabbit'), mkChild('小寶','bear')];
+let ci = 0;
+const kid = () => kids[ci];
+
+// ===== PICKER =====
+function buildPicker() {
+  const p = document.getElementById('apicker'); p.innerHTML = '';
+  ANIMALS.forEach(a => {
+    const d = document.createElement('div');
+    d.className = 'ap-item' + (kid().animal===a.id?' sel':'');
+    d.textContent = a.emoji;
+    d.onclick = e => { e.stopPropagation(); kid().animal=a.id; p.classList.remove('open'); renderAv(); renderSwitcher(); saveData(); };
+    p.appendChild(d);
+  });
+}
+function togglePicker() {
+  const p = document.getElementById('apicker');
+  if (p.classList.contains('open')) { p.classList.remove('open'); return; }
+  buildPicker(); p.classList.add('open');
+}
+function renderAv() {
+  const a = ANIMALS.find(x=>x.id===kid().animal)||ANIMALS[0];
+  document.getElementById('av').textContent = a.emoji;
+}
+document.addEventListener('click', e => {
+  const w = document.getElementById('awrap');
+  if (!w.contains(e.target)) document.getElementById('apicker').classList.remove('open');
+});
+
+// ===== SWITCHER =====
+function renderSwitcher() {
+  const bar = document.getElementById('child-switcher'); bar.innerHTML = '';
+  kids.forEach((k, i) => {
+    const b = document.createElement('button');
+    b.className = 'c-tab' + (i === ci ? ' active' : '');
+    const a = ANIMALS.find(x => x.id === k.animal) || ANIMALS[0];
+    b.innerHTML = `<span style="font-size:16px">${a.emoji}</span>${esc(k.name)}`;
+    b.onclick = () => { ci = i; renderSwitcher(); renderAll(); saveData(); };
+    bar.appendChild(b);
+  });
+}
+
+function onName() {
+  const v = document.getElementById('cname').value.trim();
+  kid().name = v||'寶貝';
+  const gn = document.getElementById('greeting-name');
+  if (gn) gn.textContent = kid().name;
+  renderSwitcher(); saveData();
+}
+
+// ===== RENDER ALL =====
+function renderAll() {
+  document.getElementById('cname').value = kid().name;
+  const gn = document.getElementById('greeting-name');
+  if (gn) gn.textContent = kid().name;
+  renderAv(); renderTasks(); renderRewards(); renderStampRewards(); renderStamps(); updateProg();
+  if (document.getElementById('panel-history').classList.contains('active')) renderHistory();
+}
+
+function switchTab(t) {
+  ['tasks','rewards','history'].forEach(p => {
+    document.getElementById(`panel-${p}`).classList.toggle('active',p===t);
+    document.getElementById(`tab-${p}`).classList.toggle('active',p===t);
+  });
+  if (t==='history') renderHistory();
+}
+
+const CATS = ['運動','家事','生活','習慣','學校'];
+
+// ===== RENDER TASKS =====
+function renderTasks() {
+  const list = document.getElementById('tlist'); list.innerHTML='';
+  kid().tasks.forEach((task, idx) => {
+    const cat = task.cat || '生活';
+    const row = document.createElement('div');
+    row.className='item-row'; row.id=`tr-${task.id}`; row.dataset.ci=idx%8;
+    const catOpts = CATS.map(c=>`<option value="${c}" ${c===cat?'selected':''}>${c}</option>`).join('');
+    row.innerHTML=`
+      <span class="cat-tag cat-${cat}">${cat}</span>
+      <span class="item-name-d">${esc(task.name)}</span>
+      <span class="pts-d">+${task.pts} 點</span>
+      <div class="edit-fs">
+        <select class="cat-sel" id="tc-${task.id}" onchange="kid().tasks.find(t=>t.id===${task.id}).cat=this.value">${catOpts}</select>
+        <input class="name-in" id="tn-${task.id}" value="${esc(task.name)}" maxlength="20"/>
+        <div class="pts-ctrl">
+          <button class="pts-b" onclick="chPts('task',${task.id},-1)">−</button>
+          <span class="pts-v" id="tv-${task.id}">+${task.pts}</span>
+          <button class="pts-b" onclick="chPts('task',${task.id},1)">＋</button>
+        </div>
+      </div>
+      <button class="sv-b" onclick="saveE('task',${task.id})">✔ 儲存</button>
+      <button class="cl-b" onclick="cancelE('task',${task.id})">✕</button>
+      <button class="cmp-btn" onclick="complete(${task.id})">✔ 完成</button>
+      <button class="ib eb" onclick="startE('task',${task.id})" title="編輯">✏️</button>
+      <button class="ib db" onclick="delItem('task',${task.id})">🗑</button>`;
+    list.appendChild(row);
+  });
+}
+
+// ===== RENDER REWARDS =====
+function renderRewards() {
+  const list = document.getElementById('rlist'); list.innerHTML='';
+  kid().rewards.forEach((r, idx) => {
+    const can = kid().pts>=r.pts;
+    const row = document.createElement('div');
+    row.className='item-row'; row.id=`rr-${r.id}`; row.dataset.ci=idx%8;
+    row.innerHTML=`
+      <span class="item-name-d">${esc(r.name)}</span>
+      <span class="pts-d">${r.pts} 點</span>
+      <div class="edit-fs">
+        <input class="name-in" id="rn-${r.id}" value="${esc(r.name)}" maxlength="20"/>
+        <div class="pts-ctrl">
+          <button class="pts-b" onclick="chPts('reward',${r.id},-5)">−</button>
+          <span class="pts-v" id="rv-${r.id}">${r.pts}</span>
+          <button class="pts-b" onclick="chPts('reward',${r.id},5)">＋</button>
+        </div>
+      </div>
+      <button class="sv-b" onclick="saveE('reward',${r.id})">✔ 儲存</button>
+      <button class="cl-b" onclick="cancelE('reward',${r.id})">✕</button>
+      <button class="rdm-btn" ${can?'':'disabled'} onclick="redeem(${r.id})">🎁 兌換</button>
+      <button class="ib eb" onclick="startE('reward',${r.id})" title="編輯">✏️</button>
+      <button class="ib db" onclick="delItem('reward',${r.id})">🗑</button>`;
+    list.appendChild(row);
+  });
+}
+
+// ===== STAMP REWARDS =====
+function renderStampRewards() {
+  const con = document.getElementById('srlist'); con.innerHTML='';
+  kid().stampRewards.forEach((sr, idx) => {
+    const canRedeem = kid().stamps >= sr.required;
+    const pct = Math.min(100, Math.round((kid().stamps / sr.required) * 100));
+    const row = document.createElement('div');
+    row.className='sr-row'; row.id=`srr-${sr.id}`; row.dataset.ci=idx%8;
+    row.innerHTML=`
+      <span class="sr-name-d">${esc(sr.name)}</span>
+      <span class="sr-req-d">需集滿 <strong>${sr.required}</strong> 章（目前 ${kid().stamps} 章）</span>
+      <button class="rdm-stamp-btn" ${canRedeem?'':'disabled'} onclick="redeemStampReward(${sr.id})">🏅 兌換</button>
+      <button class="ib eb" onclick="startSrEdit(${sr.id})" title="編輯">✏️</button>
+      <button class="ib db" onclick="delStampReward(${sr.id})">🗑</button>
+      <div class="sr-progress">
+        <div class="sr-prog-track"><div class="sr-prog-fill" style="width:${pct}%"></div></div>
+        <div class="sr-prog-label">${canRedeem?'🎉 可以兌換了！':`還差 ${sr.required - kid().stamps} 章`}</div>
+      </div>
+      <div class="sr-edit-fs">
+        <input class="name-in" id="srn-${sr.id}" value="${esc(sr.name)}" placeholder="獎勵名稱" maxlength="20"/>
+        <div class="sr-req-ctrl">
+          <button class="pts-b" onclick="chSrReq(${sr.id},-1)">−</button>
+          <span class="pts-v" id="srv-${sr.id}">${sr.required} 章</span>
+          <button class="pts-b" onclick="chSrReq(${sr.id},1)">＋</button>
+        </div>
+        <button class="sv-b" onclick="saveSrEdit(${sr.id})">✔ 儲存</button>
+        <button class="cl-b" onclick="cancelSrEdit(${sr.id})">✕</button>
+      </div>`;
+    con.appendChild(row);
+  });
+}
+
+function startSrEdit(id) {
+  const sr = kid().stampRewards.find(x=>x.id===id); if(!sr) return;
+  eb[`sr-${id}`]={name:sr.name,required:sr.required};
+  document.getElementById(`srr-${id}`).classList.add('editing');
+}
+function saveSrEdit(id) {
+  const inp = document.getElementById(`srn-${id}`);
+  const sr = kid().stampRewards.find(x=>x.id===id); if(!sr) return;
+  sr.name = inp.value.trim()||sr.name;
+  delete eb[`sr-${id}`];
+  renderStampRewards(); saveData();
+}
+function cancelSrEdit(id) {
+  const bk = eb[`sr-${id}`];
+  if(bk){ const sr=kid().stampRewards.find(x=>x.id===id); if(sr){sr.name=bk.name;sr.required=bk.required;} delete eb[`sr-${id}`]; }
+  renderStampRewards();
+}
+function chSrReq(id,d) {
+  const sr = kid().stampRewards.find(x=>x.id===id);
+  if(sr){ sr.required=Math.max(1,Math.min(STAMP_TOTAL,sr.required+d)); document.getElementById(`srv-${id}`).textContent=`${sr.required} 章`; }
+}
+function addStampReward() {
+  kid().stampRewards.push({id:nid++,name:'新集章獎勵',required:20});
+  renderStampRewards();
+  startSrEdit(kid().stampRewards[kid().stampRewards.length-1].id);
+  saveData();
+}
+function delStampReward(id) {
+  kid().stampRewards = kid().stampRewards.filter(x=>x.id!==id);
+  renderStampRewards(); saveData();
+}
+function redeemStampReward(id) {
+  const sr = kid().stampRewards.find(x=>x.id===id);
+  if(!sr||kid().stamps<sr.required) return;
+  kid().stamps -= sr.required;
+  kid().history.push({name:`集章獎勵：${sr.name}`,pts:0,icon:'🏅',time:now()});
+  renderStamps(); renderStampRewards();
+  if(document.getElementById('panel-history').classList.contains('active')) renderHistory();
+  saveData();
+  toast(`🏅 兌換集章獎勵「${sr.name}」！`); confetti(true);
+}
+
+// ===== HISTORY =====
+function renderHistory() {
+  const con = document.getElementById('hcon');
+  if (!kid().history.length) { con.innerHTML='<div class="empty-hint">🌱 還沒有記錄，快去完成任務吧！</div>'; return; }
+  con.innerHTML='';
+  const div = document.createElement('div'); div.className='hist-list';
+  [...kid().history].map((h,i)=>({...h,oi:i})).reverse().forEach(h=>{
+    const row=document.createElement('div');
+    const taskIcons = new Set(Object.values(CAT_EMOJI));
+    const bgClass = taskIcons.has(h.icon) || h.icon==='✅' ? 'h-task' : h.icon==='🎁' ? 'h-reward' : 'h-stamp';
+    row.className=`hist-row ${bgClass}`;
+    const neg=h.pts<0;
+    const ptsClass = h.pts===0 ? '' : (neg ? 'neg' : 'pos');
+    const ptsStr = h.pts===0 ? '' : `<span class="hist-pts ${ptsClass}">${neg?'':'+'}${h.pts} 點</span>`;
+    row.innerHTML=`<span style="font-size:15px">${h.icon}</span><span style="flex:1">${esc(h.name)}</span>${ptsStr}<span class="hist-time">${h.time}</span><button class="ib db" onclick="delHist(${h.oi})" title="刪除">🗑</button>`;
+    div.appendChild(row);
+  });
+  con.appendChild(div);
+}
+function delHist(idx) {
+  const h=kid().history[idx]; if(!h) return;
+  kid().pts-=h.pts; if(kid().pts<0) kid().pts=0;
+  if(h.pts>0) kid().stamps=Math.max(0,kid().stamps-1);
+  kid().history.splice(idx,1);
+  updateProg(); renderStamps(); renderRewards(); renderHistory();
+  saveData();
+  toast('↩️ 已刪除紀錄，點數已還原');
+}
+
+// ===== STAMPS — plain colored circles =====
+function renderStamps() {
+  const g=document.getElementById('sgrid'); g.innerHTML='';
+  const ON_COLORS=['#e8c0b0','#b8ddb8','#b8d4f0','#e0c8f0','#f0e0a8','#f0b8c8','#b8ead8','#f0d0a8'];
+  for(let i=0;i<STAMP_TOTAL;i++){
+    const s=document.createElement('div');
+    const on=i<kid().stamps;
+    s.className='stamp'+(on?' on':'');
+    s.style.background=on?ON_COLORS[i%ON_COLORS.length]:'var(--surface2)';
+    s.style.border=on?'none':'1.5px solid var(--border)';
+    g.appendChild(s);
+  }
+}
+
+// ===== GOAL EDIT =====
+let goalTmp = 0;
+function toggleGoalEdit() {
+  const area = document.getElementById('goal-edit-area');
+  const open = area.style.display === 'none';
+  area.style.display = open ? 'block' : 'none';
+  if (open) {
+    goalTmp = kid().goal || 0;
+    document.getElementById('goal-val').textContent = goalTmp === 0 ? '自動' : `${goalTmp} 點`;
+  }
+}
+function changeGoal(d) {
+  goalTmp = Math.max(0, goalTmp + d);
+  document.getElementById('goal-val').textContent = goalTmp === 0 ? '自動' : `${goalTmp} 點`;
+}
+function saveGoal() {
+  kid().goal = goalTmp;
+  document.getElementById('goal-edit-area').style.display = 'none';
+  updateProg(); saveData();
+}
+
+// ===== PROGRESS =====
+function updateProg() {
+  document.getElementById('tpts').textContent = kid().pts;
+  const bar = document.getElementById('prog-bar');
+  const lbl = document.getElementById('prog-lbl');
+  const goal = kid().goal || 0;
+
+  if (goal > 0) {
+    // custom goal mode
+    const pct = Math.min(100, Math.round((kid().pts / goal) * 100));
+    bar.style.width = pct + '%';
+    if (kid().pts >= goal) {
+      lbl.innerHTML = '🎉 達成目標了！';
+    } else {
+      lbl.innerHTML = `目標 ${goal} 點，還差 <span>${goal - kid().pts}</span> 點`;
+    }
+  } else {
+    // auto mode — next reward
+    const sorted = [...kid().rewards].sort((a,b) => a.pts - b.pts);
+    const next = sorted.find(r => r.pts > kid().pts);
+    if (next) {
+      const prev = sorted.filter(r => r.pts <= kid().pts).pop();
+      const base = prev ? prev.pts : 0;
+      bar.style.width = Math.min(100, ((kid().pts - base) / (next.pts - base)) * 100) + '%';
+      lbl.innerHTML = `距離「${next.name}」還差 <span>${next.pts - kid().pts}</span> 點`;
+    } else if (kid().rewards.length) {
+      bar.style.width = '100%'; lbl.innerHTML = '🎉 所有獎勵都可以兌換了！';
+    } else {
+      bar.style.width = '0%'; lbl.textContent = '快新增獎勵或設定目標吧！';
+    }
+  }
+}
+
+// ===== CHILD MANAGER =====
+function openMgr() {
+  renderMgr();
+  document.getElementById('mgr-overlay').style.display = 'flex';
+}
+function closeMgr() {
+  document.getElementById('mgr-overlay').style.display = 'none';
+  renderSwitcher(); renderAll(); saveData();
+}
+function renderMgr() {
+  const list = document.getElementById('mgr-list'); list.innerHTML = '';
+  kids.forEach((k, i) => {
+    const a = ANIMALS.find(x => x.id === k.animal) || ANIMALS[0];
+    const row = document.createElement('div');
+    row.className = 'child-mgr-row';
+    row.innerHTML = `
+      <span class="child-mgr-emoji" onclick="mgrPickAnimal(${i})" title="點擊換動物" style="cursor:pointer">${a.emoji}</span>
+      <input class="child-mgr-name" value="${esc(k.name)}" maxlength="10"
+        oninput="kids[${i}].name=this.value.trim()||'寶貝'" />
+      ${kids.length > 1
+        ? `<button class="ib db" onclick="mgrDel(${i})" title="刪除">🗑</button>`
+        : ''}
+    `;
+    list.appendChild(row);
+  });
+}
+function mgrAddChild() {
+  const animals = ['rabbit','bear','sheep','dog','dino','pig'];
+  kids.push(mkChild('新寶貝', animals[kids.length % animals.length]));
+  ci = kids.length - 1;
+  renderMgr();
+}
+function mgrDel(i) {
+  if (kids.length <= 1) return;
+  kids.splice(i, 1);
+  if (ci >= kids.length) ci = kids.length - 1;
+  renderMgr();
+}
+function mgrPickAnimal(i) {
+  // cycle through animals on tap
+  const ids = ANIMALS.map(a => a.id);
+  const cur = ids.indexOf(kids[i].animal);
+  kids[i].animal = ids[(cur + 1) % ids.length];
+  renderMgr();
+}
+
+const CAT_EMOJI = {'運動':'🏃','家事':'🧹','生活':'🌿','習慣':'⭐','學校':'📚'};
+
+// ===== COMPLETE / REDEEM =====
+function complete(id) {
+  const t=kid().tasks.find(x=>x.id===id); if(!t) return;
+  kid().pts+=t.pts; kid().stamps=Math.min(kid().stamps+1,STAMP_TOTAL);
+  const icon = CAT_EMOJI[t.cat] || '✅';
+  kid().history.push({name:t.name,pts:t.pts,icon,time:now()});
+  updateProg(); renderStamps(); renderRewards(); renderStampRewards();
+  saveData();
+  toast(`🎉 完成「${t.name}」！＋${t.pts} 點`); confetti();
+}
+function redeem(id) {
+  const r=kid().rewards.find(x=>x.id===id);
+  if(!r||kid().pts<r.pts) return;
+  kid().pts-=r.pts;
+  kid().history.push({name:r.name,pts:-r.pts,icon:'🎁',time:now()});
+  updateProg(); renderRewards();
+  saveData();
+  toast(`🎁 兌換「${r.name}」！−${r.pts} 點`); confetti(true);
+}
+
+// ===== EDIT =====
+function startE(type,id) {
+  const items=type==='task'?kid().tasks:kid().rewards;
+  const item=items.find(x=>x.id===id); if(!item) return;
+  eb[`${type}-${id}`]={name:item.name,pts:item.pts};
+  document.getElementById(`${type==='task'?'tr':'rr'}-${id}`).classList.add('editing');
+}
+function saveE(type,id) {
+  const inp=document.getElementById(`${type==='task'?'tn':'rn'}-${id}`);
+  const items=type==='task'?kid().tasks:kid().rewards;
+  const item=items.find(x=>x.id===id); if(!item) return;
+  item.name=inp.value.trim()||item.name;
+  delete eb[`${type}-${id}`];
+  if(type==='task') renderTasks(); else{renderRewards();updateProg();}
+  saveData();
+}
+function cancelE(type,id) {
+  const bk=eb[`${type}-${id}`];
+  if(bk){
+    const items=type==='task'?kid().tasks:kid().rewards;
+    const item=items.find(x=>x.id===id);
+    if(item){item.name=bk.name;item.pts=bk.pts;}
+    delete eb[`${type}-${id}`];
+  }
+  if(type==='task') renderTasks(); else{renderRewards();updateProg();}
+}
+function chPts(type,id,d) {
+  if(type==='task'){
+    const t=kid().tasks.find(x=>x.id===id);
+    if(t){t.pts=Math.max(1,t.pts+d);document.getElementById(`tv-${id}`).textContent=`+${t.pts}`;}
+  } else {
+    const r=kid().rewards.find(x=>x.id===id);
+    if(r){r.pts=Math.max(5,r.pts+d);document.getElementById(`rv-${id}`).textContent=r.pts;}
+  }
+}
+
+// ===== ADD/DELETE =====
+function addTask() {
+  const id=nid++; kid().tasks.push({id,name:'新任務',pts:5,cat:'生活'});
+  renderTasks(); startE('task',id); saveData();
+}
+function addReward() {
+  const id=nid++; kid().rewards.push({id,name:'新獎勵',pts:30});
+  renderRewards(); updateProg(); startE('reward',id); saveData();
+}
+function delItem(type,id) {
+  if(type==='task'){kid().tasks=kid().tasks.filter(t=>t.id!==id);renderTasks();}
+  else{kid().rewards=kid().rewards.filter(r=>r.id!==id);renderRewards();updateProg();}
+  saveData();
+}
+
+// ===== TOAST =====
+function toast(msg) {
+  const c=document.getElementById('tc');
+  const t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  c.appendChild(t); setTimeout(()=>t.remove(),2600);
+}
+
+// ===== CONFETTI =====
+function confetti(big=false) {
+  const cols=['#e87080','#f0c040','#60c880','#8090f0','#f09050','#80d0e8'];
+  for(let i=0;i<(big?55:30);i++){
+    const p=document.createElement('div'); p.className='cfp';
+    p.style.cssText=`left:${Math.random()*100}vw;background:${cols[Math.floor(Math.random()*cols.length)]};width:${7+Math.random()*8}px;height:${7+Math.random()*8}px;border-radius:${Math.random()>.5?'50%':'3px'};animation-duration:${1.2+Math.random()*1.5}s;animation-delay:${Math.random()*.5}s;`;
+    document.body.appendChild(p); setTimeout(()=>p.remove(),2500);
+  }
+}
+
+// ===== UTILS =====
+function now(){const d=new Date();return`${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ===== LOCALSTORAGE =====
+const SAVE_KEY = 'rewardChart_v1';
+
+function saveData() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ kids, ci, nid }));
+  } catch(e) { console.warn('儲存失敗', e); }
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (data.kids && data.kids.length > 0) {
+      kids = data.kids;
+      ci = data.ci || 0;
+      nid = data.nid || 100;
+      return true;
+    }
+  } catch(e) { console.warn('載入失敗', e); }
+  return false;
+}
+
+// ===== INIT =====
+if (!loadData()) {
+  // 第一次開啟，使用預設資料
+}
+renderSwitcher();
+renderAll();
+</script>
+</body>
+</html>
