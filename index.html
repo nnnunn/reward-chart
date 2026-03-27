@@ -104,7 +104,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 
 /* ===== ITEM ROWS — soft pastel colors ===== */
 .item-list{display:flex;flex-direction:column;gap:10px;}
-.item-row{display:flex;align-items:center;gap:8px;padding:13px 14px;border-radius:14px;border:none;transition:box-shadow 0.18s;flex-wrap:wrap;}
+.item-row{display:flex;align-items:center;gap:6px;padding:10px 12px;border-radius:14px;border:none;transition:box-shadow 0.18s;flex-wrap:nowrap;overflow:hidden;}
 .item-row:hover{box-shadow:0 3px 14px var(--shadow);}
 
 .item-row[data-ci="0"]{background:#f2e6e0;} /* dusty rose */
@@ -116,8 +116,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .item-row[data-ci="6"]{background:#ddf0ea;} /* seafoam */
 .item-row[data-ci="7"]{background:#f0ebe0;} /* linen */
 
-.item-name-d{flex:1;font-size:13px;font-weight:700;color:#7a6e66;padding:0 4px;min-width:80px;}
-.pts-d{font-size:13px;font-weight:800;color:#a8907a;padding:0 4px;flex-shrink:0;white-space:nowrap;}
+.item-name-d{flex:1;font-size:13px;font-weight:700;color:#7a6e66;padding:0 3px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pts-d{font-size:12px;font-weight:800;color:#a8907a;padding:0 2px;flex-shrink:0;white-space:nowrap;}
 
 /* edit mode */
 .edit-fs{display:none;align-items:center;gap:8px;flex:1;flex-wrap:wrap;}
@@ -131,20 +131,20 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .pts-v{font-size:13px;font-weight:800;color:var(--text);min-width:40px;text-align:center;white-space:nowrap;}
 
 /* action buttons */
-.ib{width:28px;height:28px;border-radius:8px;border:2px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.5);color:var(--text2);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.14s;flex-shrink:0;}
+.ib{width:26px;height:26px;border-radius:8px;border:2px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.5);color:var(--text2);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.14s;flex-shrink:0;}
 .ib:hover.eb{background:rgba(255,255,255,0.85);}
 .ib:hover.db{background:rgba(255,80,80,0.18);border-color:#e05555;color:#e05555;}
-.sv-b{padding:6px 11px;border-radius:8px;border:none;background:rgba(0,0,0,0.18);color:#fff;font-size:12px;font-weight:700;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
+.sv-b{padding:5px 9px;border-radius:8px;border:none;background:rgba(0,0,0,0.18);color:#fff;font-size:11px;font-weight:700;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
 .sv-b:hover{background:rgba(0,0,0,0.28);}
-.cl-b{padding:6px 9px;border-radius:8px;border:2px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.5);color:var(--text2);font-size:12px;font-weight:700;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
+.cl-b{padding:5px 7px;border-radius:8px;border:2px solid rgba(0,0,0,0.12);background:rgba(255,255,255,0.5);color:var(--text2);font-size:11px;font-weight:700;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
 .item-row .sv-b,.item-row .cl-b{display:none;}
 .item-row.editing .eb{display:none;}
 .item-row.editing .sv-b,.item-row.editing .cl-b{display:inline-flex;}
 
-.cmp-btn{padding:6px 13px;border-radius:10px;border:none;background:rgba(255,255,255,0.65);color:var(--text);font-size:12px;font-weight:800;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
+.cmp-btn{padding:5px 10px;border-radius:10px;border:none;background:rgba(255,255,255,0.65);color:var(--text);font-size:11px;font-weight:800;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
 .cmp-btn:hover{background:rgba(255,255,255,0.9);}
 .cmp-btn:active{transform:scale(0.96);}
-.rdm-btn{padding:6px 13px;border-radius:10px;border:none;background:rgba(255,255,255,0.65);color:var(--text);font-size:12px;font-weight:800;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
+.rdm-btn{padding:5px 10px;border-radius:10px;border:none;background:rgba(255,255,255,0.65);color:var(--text);font-size:11px;font-weight:800;font-family:var(--font-b);cursor:pointer;transition:all 0.14s;flex-shrink:0;white-space:nowrap;}
 .rdm-btn:hover{background:rgba(255,255,255,0.9);}
 .rdm-btn:disabled{opacity:0.4;cursor:not-allowed;}
 
